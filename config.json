@@ -1,0 +1,13 @@
+
+{
+    "meta" : {
+        "version" : "0.0.1-beta",
+        "version_state" : "beta"
+    },
+    "config" : {
+        "endpoint" : "https://api.thepackageplace.com/api/client/validate",
+        "healthcheck" : "https://api.thepackageplace.com/api/health"
+    }
+   
+}
+
