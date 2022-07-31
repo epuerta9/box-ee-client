@@ -2,11 +2,14 @@ from machine import Pin, reset
 import time
 import socket
 from wireless.html import home_html, submitted_html
-from lib.repo import Repo
+from lib.repo import Repo, WIFI_SSID_KEY
 
-def save_api_key(key):
+def save_credentials(ssid, password, key):
   repo = Repo()
-  repo.add
+  repo.add(ssid=ssid, password=password, device_api_key=key)
+  repo.flush()
+  repo.close()
+
 
 def web_page():
   try:
@@ -36,18 +39,7 @@ def web_page():
   print(ap.ifconfig())
 
   led = Pin(14, Pin.OUT)
-  if led.value() == 1:
-    gpio_state="ON"
-  else:
-    gpio_state="OFF"
 
-  html = """<html><head> <title>ESP Web Server</title> <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,"> <style>html{font-family: Helvetica; display:inline-block; margin: 0px auto; text-align: center;}
-  h1{color: #0F3376; padding: 2vh;}p{font-size: 1.5rem;}.button{display: inline-block; background-color: #e7bd3b; border: none; 
-  border-radius: 4px; color: white; padding: 16px 40px; text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}
-  .button2{background-color: #4286f4;}</style></head><body> <h1>ESP Web Server</h1> 
-  <p>GPIO state: <strong>""" + gpio_state + """</strong></p><p><a href="/?led=on"><button class="button">ON</button></a></p>
-  <p><a href="/?led=off"><button class="button button2">OFF</button></a></p></body></html>"""
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
   s.bind(('', 80))
@@ -90,7 +82,9 @@ def web_page():
           print('LED ON')
           led.value(1)
           time.sleep(3)
-          led.value(0)       
+          led.value(0)
+          print("saving credentials...")
+          save_credentials(output['ssid'], output['password'], output['device-key'])
         break
     
     response = home_html

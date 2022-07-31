@@ -2,7 +2,7 @@
 
 home_html = """
 <!DOCTYPE html>
-<title><The Package Place Device Page</title>
+<title><Box-ee Device Page</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
 <style>
@@ -64,7 +64,7 @@ div {
 #action="/urlencoded?apikey=device-key"
 submitted_html = """
 <!DOCTYPE html>
-<title>The Package Place Device Page</title>
+<title>Box-ee Device Page</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
 <style>

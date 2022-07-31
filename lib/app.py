@@ -7,12 +7,6 @@ class App:
 
     def __init__(self, api_key, conf):
 
-        #check if config file exists
-        try:
-            os.stat("config.json")
-        except OSError as err:
-            print(err)
-            raise Exception("config file: config.json does not exist")
         self.endpoint = conf["config"]["endpoint"]
         self.healthcheck = conf["config"]["healthcheck"]
         self.api_key = api_key
@@ -33,5 +27,6 @@ class App:
         
     
 
-def run_app(config):
-    pass
+def run_app(config, api_key):
+    app = App(api_key=api_key, conf=config)
+    
