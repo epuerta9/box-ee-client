@@ -1,6 +1,8 @@
-import os
-import json
+
 import urequests as requests
+from  lib.lock import Lock, LOCK_PIN
+from lib.pinpad import PinPad
+from machine import Pin
 
 
 class App:
@@ -29,4 +31,8 @@ class App:
 
 def run_app(config, api_key):
     app = App(api_key=api_key, conf=config)
+
+
+
+    
     

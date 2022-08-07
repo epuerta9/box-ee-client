@@ -5,8 +5,8 @@
         "version_state" : "beta"
     },
     "config" : {
-        "endpoint" : "https://api.thepackageplace.com/api/client/validate",
-        "healthcheck" : "https://api.thepackageplace.com/api/health"
+        "endpoint" : "https://api.box-ee.com/api/client/validate",
+        "healthcheck" : "https://api.box-ee.com/api/health"
     }
    
 }

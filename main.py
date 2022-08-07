@@ -71,7 +71,7 @@ def main():
         print('network config:', sta_if.ifconfig())
         repo.close()
         
-        #Start package place device program
+        #Start box-ee device program
         run_app(config, api_key)
 
     else:
