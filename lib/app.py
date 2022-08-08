@@ -2,7 +2,7 @@
 import urequests as requests
 from  lib.lock import Lock, LOCK_PIN
 from lib.pinpad import PinPad
-from machine import Pin
+from esp32 import wake_on_ext0, WAKEUP_ANY_HIGH
 
 
 class App:
@@ -28,10 +28,6 @@ class App:
 
         
     
-
-def run_app(config, api_key):
-    app = App(api_key=api_key, conf=config)
-
 
 
     

@@ -6,13 +6,16 @@ main.py will be responsible for running the main program which runs through the 
 ** if not, run as AccessPoint with webpage for wireless credentials
 
 """
-from sys import api_version
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from lib.app import run_app
+from lib.app import App
+from lib.pinpad import PinPad
 import network
-import machine
+from machine import disable_irq, enable_irq, Pin
 import json
+
+
+interruptCounter = 0
 
 def delete(repo):
     repo.delete(WIFI_SSID_KEY)
@@ -70,13 +73,28 @@ def main():
         
         print('network config:', sta_if.ifconfig())
         repo.close()
-        
         #Start box-ee device program
-        run_app(config, api_key)
-
+        app = App(api_key=api_key, conf=config)
+        pad = PinPad()
+        global interruptCounter
+        pound_key_pin = pad.col_pins[2]
+        pound_key_pin.irq(trigger=Pin.IRQ_FALLING, handler=callback)
+        while True:
+            if interruptCounter > 0:
+                state = disable_irq()
+                interruptCounter = interruptCounter-1
+                pass_codes = pad.scan_keys()
+                print(pass_codes)
+                pinkey = ",".join(pass_codes)
+                print("to be validated: ", pinkey)
+                enable_irq(state)
+    
     else:
         web_page()
 
-if __name__ == '__main__':
-    main()
+def callback(pin):
+    global interruptCounter
+
+
+main()
 

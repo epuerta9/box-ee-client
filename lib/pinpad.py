@@ -22,22 +22,23 @@ class PinPad:
 
         self.row_pins = [Pin(KEY_ROWS[idx], Pin.OUT, value=1) for idx, x in enumerate(KEY_ROWS)]
         self.col_pins = [Pin(KEY_COLS[idx], Pin.IN, Pin.PULL_DOWN, value=0) for idx, x in enumerate(KEY_COLS)]
-
+        self.pass_code = []
 
     def scan_keys(self):
         import utime
-        pass_code = []
+        if self.pass_code:
+            self.pass_code.clear()
         while GLOBAL_SCAN_INTERRUPT:
             for i, row in enumerate(self.row_pins):
                 for j, col in enumerate(self.col_pins):
                     row.on()
                     if col.value() == 1:
                         print("you have pressed: ", KEY_MATRIX[i][j])
-                        pass_code.append(KEY_MATRIX[i][j])
-                        if len(pass_code) == 4:
+                        self.pass_code.append(KEY_MATRIX[i][j])
+                        if len(self.pass_code) == 4:
                             break
                         utime.sleep(0.3)
                 row.off()
         GLOBAL_SCAN_INTERRUPT = True
-        return pass_code
+        return self.pass_code
     
