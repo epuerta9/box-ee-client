@@ -28,7 +28,7 @@ class PinPad:
         import utime
         if self.pass_code:
             self.pass_code.clear()
-        while GLOBAL_SCAN_INTERRUPT:
+        while True:
             for i, row in enumerate(self.row_pins):
                 for j, col in enumerate(self.col_pins):
                     row.on()
