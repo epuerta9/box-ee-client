@@ -1,8 +1,7 @@
 from machine import Pin, reset
 import time
-import socket
 from wireless.html import home_html, submitted_html
-from lib.repo import Repo, WIFI_SSID_KEY
+from lib.repo import Repo
 
 def save_credentials(ssid, password, key):
   repo = Repo()

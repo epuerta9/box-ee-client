@@ -1,5 +1,5 @@
 
-from machine import Pin, Timer
+from machine import Pin
 
 
 KEY_MATRIX = [
@@ -28,7 +28,8 @@ class PinPad:
         import utime
         if self.pass_code:
             self.pass_code.clear()
-        while True:
+        exit_var = True
+        while exit_var:
             for i, row in enumerate(self.row_pins):
                 for j, col in enumerate(self.col_pins):
                     row.on()
@@ -36,9 +37,8 @@ class PinPad:
                         print("you have pressed: ", KEY_MATRIX[i][j])
                         self.pass_code.append(KEY_MATRIX[i][j])
                         if len(self.pass_code) == 4:
-                            break
+                            exit_var = False
                         utime.sleep(0.3)
                 row.off()
-        GLOBAL_SCAN_INTERRUPT = True
         return self.pass_code
     
