@@ -24,12 +24,10 @@ class PinPad:
         self.col_pins = [Pin(KEY_COLS[idx], Pin.IN, Pin.PULL_DOWN, value=0) for idx, x in enumerate(KEY_COLS)]
         self.pass_code = []
 
-    def scan_keys(self):
-        import utime
+    async def run(self, async_sleep):
         if self.pass_code:
             self.pass_code.clear()
-        exit_var = True
-        while exit_var:
+        while True:
             for i, row in enumerate(self.row_pins):
                 for j, col in enumerate(self.col_pins):
                     row.on()
@@ -37,8 +35,8 @@ class PinPad:
                         print("you have pressed: ", KEY_MATRIX[i][j])
                         self.pass_code.append(KEY_MATRIX[i][j])
                         if len(self.pass_code) == 4:
-                            exit_var = False
-                        utime.sleep(0.3)
+                            print(self.pass_code)
+                            self.pass_code.clear()
                 row.off()
-        return self.pass_code
+            await async_sleep(5)
     

@@ -7,29 +7,27 @@ main.py will be responsible for running the main program which runs through the 
 
 """
 
-from lib.app import build_app
-
+from lib.app import build_app, blink_success, blink_fail
 
 
 interruptCounter = 0
-
-LED_BUILTIN = 2
 
 
 def main():
     #Start box-ee device program
     app = build_app()
-
+    blink_success()
     #check connectivity
-    if not app.ping():
+    if app.ping().get('msg') != 'ok':
+        blink_fail()
         raise Exception("unable to ping api.box-ee.com")
+
     pad = PinPad()
     while True:
         pass_codes = pad.scan_keys()
         print(pass_codes)
         pinkey = ",".join(pass_codes)
         print("to be validated: ", pinkey)
-        app.validate_pin(pinkey)
         gc.collect()
         
 
