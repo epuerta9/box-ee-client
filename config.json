@@ -6,7 +6,11 @@
     },
     "config" : {
         "endpoint" : "https://api.box-ee.com/api/client/validate",
-        "healthcheck" : "https://api.box-ee.com/api/health"
+        "healthcheck" : "https://api.box-ee.com/api/health",
+        "features" : {
+            "pinpad" : true,
+            "scanner" : true
+        }
     }
    
 }

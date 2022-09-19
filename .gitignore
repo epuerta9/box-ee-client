@@ -1,3 +1,6 @@
 venv/
 .vscode/
 quick_import*
+venv2/
+micro*
+scanner_main.py

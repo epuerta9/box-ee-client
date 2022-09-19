@@ -23,8 +23,8 @@ class App:
         self.endpoint = conf["config"]["endpoint"]
         self.healthcheck = conf["config"]["healthcheck"]
         self.api_key = api_key
-        self.pinpad = kw.get("pinpad")
-        self.scanner = kw.get("scanner")
+        self.pinpad = conf["config"]["features"].get("pinpad", False)
+        self.scanner = conf["config"]["features"].get("scanner", False)
 
     def ping(self):
         response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'}).json()
