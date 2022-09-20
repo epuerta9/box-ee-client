@@ -1,15 +1,15 @@
-from venv import create
 import urequests as requests
 import ujson as json
 from machine import Pin
 import time
 import gc
 from  lib.lock import Lock, LOCK_PIN
+from lib.scanner import Scanner
 from lib.pinpad import PinPad
 import network
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from uasyncio import run, create_task, sleep_ms
+from uasyncio import run, create_task, sleep
 
 
 
@@ -23,8 +23,10 @@ class App:
         self.endpoint = conf["config"]["endpoint"]
         self.healthcheck = conf["config"]["healthcheck"]
         self.api_key = api_key
-        self.pinpad = conf["config"]["features"].get("pinpad", False)
-        self.scanner = conf["config"]["features"].get("scanner", False)
+        self.build_pinpad = conf["config"]["features"].get("pinpad", False)
+        self.build_scanner = conf["config"]["features"].get("scanner", False)
+        self._uart = kw.get("uart")
+        self._lock_pin = kw.get("lock_pin")
 
     def ping(self):
         response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'}).json()
@@ -37,8 +39,13 @@ class App:
         """
         try:
             url = self.endpoint + "?pinkey=" + pin_code
-            response = requests.get(url).json()
+            headers = {
+                "Content-Type" : "application/json",
+                "X-Boxee-ClientToken" : self.api_key
+            }
+            response = requests.get(url, headers=headers).json()
             print(response)
+            return response
         except Exception as err:
             print(err)
 
@@ -47,15 +54,25 @@ class App:
         asyncio run attachments
         """
         tasks = []
-        if self.pinpad:
-            tasks.append(create_task(self.pinpad.run(sleep_ms)))
 
-        if self.scanner:
-            tasks.append(create_task(self.scanner.run(sleep_ms)))
+        #build lock
+        if not self._lock_pin:
+            raise Exception("missing pin object for lock")
+        lock = Lock(self._lock_pin)
+        if self.build_pinpad:
+            pinpad = PinPad()
+
+            tasks.append(create_task(pinpad.run(sleep)))
+
+        if self.build_scanner:
+            if not self._uart:
+                raise Exception("uart object missing")
+            scanner = Scanner(self._uart, async_validate_func=self.validate_pin, lock=lock)
+            tasks.append(scanner.run(sleep))
         
         run(*tasks)
 
-def build_app():
+def build_app(**kw):
     #check if btree info is populated
     with open("config.json") as f:
         config = json.load(f)
@@ -102,7 +119,7 @@ def build_app():
         print('network config:', sta_if.ifconfig())
         blink_success()
         repo.close()
-        return App(api_key=api_key, conf=config)
+        return App(api_key=api_key, conf=config, **kw)
     else:
         web_page()
 

@@ -9,26 +9,28 @@ main.py will be responsible for running the main program which runs through the 
 
 from lib.app import build_app, blink_success, blink_fail
 
+from machine import UART, Pin
 
 interruptCounter = 0
 
 
 def main():
     #Start box-ee device program
-    app = build_app()
+
+    #uart interface for barcode scanner
+    uart = UART(1,400000, rx=18, tx=19)
+
+    #pin for lock 
+    lock_pin = Pin(0, Pin.OUT)
+
+    app = build_app(uart=uart, lock_pin=lock_pin)
     blink_success()
     #check connectivity
     if app.ping().get('msg') != 'ok':
         blink_fail()
         raise Exception("unable to ping api.box-ee.com")
 
-    pad = PinPad()
-    while True:
-        pass_codes = pad.scan_keys()
-        print(pass_codes)
-        pinkey = ",".join(pass_codes)
-        print("to be validated: ", pinkey)
-        gc.collect()
+
         
 
 main()

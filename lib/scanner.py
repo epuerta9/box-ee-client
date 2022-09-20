@@ -1,6 +1,6 @@
 
 #
-# code was used from https://github.com/dupontgu/ch559-circuitpython/blob/main/ch559.py
+# code snippets were used from https://github.com/dupontgu/ch559-circuitpython/blob/main/ch559.py
 #
 
 #
@@ -44,11 +44,13 @@ MOD_BIT_FLAG_MAP = {
     7: CODE_ALT_R
 }
 
-class Ch559:
-    def __init__(self, uart):
+class Scanner:
+    def __init__(self, uart, async_validate_func, lock):
         self._cached_keys = []
         self._uart = uart
         self._incomplete_data = None
+        self._async_validate_func = async_validate_func
+        self._lock = lock
     
     def poll(self):
         # reused from  code was used from https://github.com/dupontgu/ch559-circuitpython/blob/main/ch559.py
@@ -57,6 +59,9 @@ class Ch559:
         # so we use uart.readline for conevience, but we still wait for the full expected packet length
         data = self._uart.readline()
         if data is not None:
+            #during some sleeps, scanner will randomly send one extra byte, corrupting this loop. Checking for length
+            if len(data) < 15:
+                return
             if data[0] == MSG_START:
                 self._incomplete_data = None
             elif self._incomplete_data is not None:
@@ -68,7 +73,6 @@ class Ch559:
                 self._incomplete_data = data
 
     def parse(self, packet):
-        msg_len = packet[1]
         msg_type = packet[3]
         if msg_type != MSG_TYPE_DEVICE_POLL:
             return
@@ -91,19 +95,23 @@ class Ch559:
         
         return  KEY_CODES[keys_pressed[0]] if keys_pressed else None
 
-
-
-class Scanner:
-
-    def __init__(self):
-        pass
-
-
     async def run(self, async_sleep):
-
+        message = []
         while True:
-
-            await async_sleep(5)
+            event = self.poll()
+            if event is not None:
+            #value from the scanner, checking for ENTER to know when to break
+                if event == 'ENTER':
+                    tracking_number = ''.join(message)
+                    response = self._async_validate_func(tracking_number)
+                    if response.get("valid"):
+                        self._lock.unlock()
+                        await async_sleep(5)
+                        self._lock.lock()
+                    message = []
+                    print(tracking_number)
+                else:
+                    message.append(event)
 
 
 KEY_CODES = {

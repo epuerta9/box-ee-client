@@ -5,10 +5,10 @@
         "version_state" : "beta"
     },
     "config" : {
-        "endpoint" : "https://api.box-ee.com/api/client/validate",
+        "endpoint" : "https://api.box-ee.com/api/v1/client/validate",
         "healthcheck" : "https://api.box-ee.com/api/health",
         "features" : {
-            "pinpad" : true,
+            "pinpad" : false,
             "scanner" : true
         }
     }

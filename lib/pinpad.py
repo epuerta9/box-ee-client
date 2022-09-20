@@ -40,3 +40,9 @@ class PinPad:
                 row.off()
             await async_sleep(5)
     
+#            while True:
+#                pass_codes = pad.scan_keys()
+#                print(pass_codes)
+#                pinkey = ",".join(pass_codes)
+#                print("to be validated: ", pinkey)
+#                gc.collect()

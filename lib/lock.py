@@ -6,8 +6,8 @@ class Lock:
     def __init__(self, pin):
         self.pin = pin
 
-    def lock(self):
+    def unlock(self):
         self.pin.on()
     
-    def unlock(self):
+    def lock(self):
         self.pin.off()
