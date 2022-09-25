@@ -109,7 +109,7 @@ class Scanner:
                         response = self._async_validate_func(tracking_number)
                         if response.get("valid"):
                             self._lock.unlock()
-                            await uasyncio.sleep_ms(5)
+                            await uasyncio.sleep(5)
                             self._lock.lock()
                             self.blink_scanner_success(self._built_in_led)
                         else:
