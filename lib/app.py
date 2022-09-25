@@ -9,7 +9,7 @@ from lib.pinpad import PinPad
 import network
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from uasyncio import sleep_ms as async_sleep_ms, get_event_loop
+from uasyncio import get_event_loop
 
 
 
@@ -28,10 +28,13 @@ class App:
         self._built_in_led = kw.get("built_in_led")
 
     def ping(self):
-        response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'})
-        response.close()
-        
-        return response.json()
+        try:
+            response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'}).json()
+            print(f"ping response: {response}")
+        except Exception as err:
+            print(err)
+            print("unable to ping box-ee api")
+        return response
 
 
     def validate_pin(self, pin_code):
@@ -56,7 +59,7 @@ class App:
         """
         asyncio run attachments
         """
-        tasks = []
+        print("starting box-ee client")
         loop = get_event_loop()
         #build lock
         if not self._lock_pin:
@@ -75,10 +78,9 @@ class App:
             scanner = Scanner(self._uart, async_validate_func=self.validate_pin, lock=lock, built_in_led=self._built_in_led)
             loop.create_task(scanner.run())
             print("created scanner coroutine task")
-            
+
 
         loop.run_forever()
-        #await async_sleep_ms(500)
         
 
 def build_app(**kw):

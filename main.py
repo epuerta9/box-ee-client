@@ -11,7 +11,6 @@ from lib.app import build_app, blink_success_app, blink_fail_app
 
 from machine import UART, Pin
 import sys
-import uasyncio
 
 interruptCounter = 0
 
@@ -39,13 +38,7 @@ def main():
         sys.exit(1)
 
         
-    uasyncio.run(app.run())
-
-#    blink_success()
-#    #check connectivity
-#    if app.ping().get('msg') != 'ok':
-#        blink_fail()
-#        raise Exception("unable to ping api.box-ee.com")
+    app.run()
 
 
         

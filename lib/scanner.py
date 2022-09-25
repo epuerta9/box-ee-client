@@ -112,6 +112,8 @@ class Scanner:
                             await uasyncio.sleep_ms(5)
                             self._lock.lock()
                             self.blink_scanner_success(self._built_in_led)
+                        else:
+                            self.blink_scanner_fail(self._built_in_led)
                         message = []
                     except Exception:
                         print("error fetching api")
@@ -123,13 +125,15 @@ class Scanner:
 
     def blink_scanner_success(self, led):
         led.on()
-        time.sleep(.5)
+        time.sleep(3)
         led.off()
 
     def blink_scanner_fail(self, led):
-        led.on()
-        time.sleep(2)
-        led.off()
+        for _ in range(3):
+            led.on()
+            time.sleep(.5)
+            led.off()
+            time.sleep(.5)
 
 KEY_CODES = {
     4 : 'A',

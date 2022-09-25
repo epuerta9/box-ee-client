@@ -38,6 +38,18 @@ class PinPad:
         self._lock = lock
         self._built_in_led = built_in_led
 
+    def blink_scanner_success(self, led):
+        led.on()
+        time.sleep(3)
+        led.off()
+
+    def blink_scanner_fail(self, led):
+        for _ in range(3):
+            led.on()
+            time.sleep(.5)
+            led.off()
+            time.sleep(.5)
+
     async def scan_coro(self):
         """A coroutine to scan each row and check column for key events."""
        
@@ -82,6 +94,8 @@ class PinPad:
                                     self._lock.lock()
                                     self.blink_scanner_success(self._built_in_led)
                                     self.pass_code = []
+                                else:
+                                   self.blink_scanner_fail(self._built_in_led) 
                             finally:
                                 #clean the pass code
                                 self.pass_code = []
@@ -91,7 +105,4 @@ class PinPad:
                 ## Deassert row.
                 row_pin.value(0)
             await uasyncio.sleep_ms(1)
-    def blink_scanner_success(self, led):
-        led.on()
-        time.sleep(.5)
-        led.off()
+        
