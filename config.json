@@ -8,7 +8,7 @@
         "endpoint" : "https://api.box-ee.com/api/v1/client/validate",
         "healthcheck" : "https://api.box-ee.com/api/health",
         "features" : {
-            "pinpad" : false,
+            "pinpad" : true,
             "scanner" : true
         }
     }

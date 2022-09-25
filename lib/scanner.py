@@ -6,7 +6,8 @@
 #
 # Keycodes were used from adafruit HID library 
 #
-
+import time
+import uasyncio
 
 MSG_START =               0xFE
 LINE_DELIM =              0x0A
@@ -45,13 +46,14 @@ MOD_BIT_FLAG_MAP = {
 }
 
 class Scanner:
-    def __init__(self, uart, async_validate_func, lock):
+    def __init__(self, uart, async_validate_func, lock, built_in_led):
         self._cached_keys = []
         self._uart = uart
         self._incomplete_data = None
         self._async_validate_func = async_validate_func
         self._lock = lock
-    
+        self._built_in_led = built_in_led
+
     def poll(self):
         # reused from  code was used from https://github.com/dupontgu/ch559-circuitpython/blob/main/ch559.py
         # conveniently, the ch559 spits out packets delimited with newline chars
@@ -95,7 +97,7 @@ class Scanner:
         
         return  KEY_CODES[keys_pressed[0]] if keys_pressed else None
 
-    async def run(self, async_sleep):
+    async def run(self):
         message = []
         while True:
             event = self.poll()
@@ -103,16 +105,31 @@ class Scanner:
             #value from the scanner, checking for ENTER to know when to break
                 if event == 'ENTER':
                     tracking_number = ''.join(message)
-                    response = self._async_validate_func(tracking_number)
-                    if response.get("valid"):
-                        self._lock.unlock()
-                        await async_sleep(5)
-                        self._lock.lock()
-                    message = []
-                    print(tracking_number)
+                    try:
+                        response = self._async_validate_func(tracking_number)
+                        if response.get("valid"):
+                            self._lock.unlock()
+                            await uasyncio.sleep_ms(5)
+                            self._lock.lock()
+                            self.blink_scanner_success(self._built_in_led)
+                        message = []
+                    except Exception:
+                        print("error fetching api")
+                    print(f"tracking number: {tracking_number}")
                 else:
                     message.append(event)
+            await uasyncio.sleep_ms(1)
 
+
+    def blink_scanner_success(self, led):
+        led.on()
+        time.sleep(.5)
+        led.off()
+
+    def blink_scanner_fail(self, led):
+        led.on()
+        time.sleep(2)
+        led.off()
 
 KEY_CODES = {
     4 : 'A',

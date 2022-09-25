@@ -1,20 +1,17 @@
 import urequests as requests
 import ujson as json
-from machine import Pin
+import machine
 import time
 import gc
-from  lib.lock import Lock, LOCK_PIN
+from  lib.lock import Lock
 from lib.scanner import Scanner
-from lib.pinpad import PinPad
+from lib.pinpad import PinPad 
 import network
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from uasyncio import run, create_task, sleep
+from uasyncio import sleep_ms as async_sleep_ms, get_event_loop
 
 
-
-LED_BUILTIN = 2
-p_builtin = Pin(2, Pin.OUT)
 
 class App:
 
@@ -27,10 +24,14 @@ class App:
         self.build_scanner = conf["config"]["features"].get("scanner", False)
         self._uart = kw.get("uart")
         self._lock_pin = kw.get("lock_pin")
+        self._reset_button = kw.get("reset_button")
+        self._built_in_led = kw.get("built_in_led")
 
     def ping(self):
-        response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'}).json()
-        return response
+        response = requests.get(self.healthcheck, headers= {'Content-Type' : 'application/json'})
+        response.close()
+        
+        return response.json()
 
 
     def validate_pin(self, pin_code):
@@ -44,35 +45,44 @@ class App:
                 "X-Boxee-ClientToken" : self.api_key
             }
             response = requests.get(url, headers=headers).json()
-            print(response)
+            print(f"successful response: {response}")
             return response
         except Exception as err:
-            print(err)
+            blink_fail_app(self._built_in_led)
+            print(f"error: {err}")
+            return None
 
     def run(self):
         """
         asyncio run attachments
         """
         tasks = []
-
+        loop = get_event_loop()
         #build lock
         if not self._lock_pin:
             raise Exception("missing pin object for lock")
         lock = Lock(self._lock_pin)
-        if self.build_pinpad:
-            pinpad = PinPad()
 
-            tasks.append(create_task(pinpad.run(sleep)))
+        if self.build_pinpad:
+            pinpad = PinPad(lock, self.validate_pin, built_in_led=self._built_in_led)
+
+            loop.create_task(pinpad.scan_coro())
+            print("created pinpad coroutine task")
 
         if self.build_scanner:
             if not self._uart:
                 raise Exception("uart object missing")
-            scanner = Scanner(self._uart, async_validate_func=self.validate_pin, lock=lock)
-            tasks.append(scanner.run(sleep))
+            scanner = Scanner(self._uart, async_validate_func=self.validate_pin, lock=lock, built_in_led=self._built_in_led)
+            loop.create_task(scanner.run())
+            print("created scanner coroutine task")
+            
+
+        loop.run_forever()
+        #await async_sleep_ms(500)
         
-        run(*tasks)
 
 def build_app(**kw):
+    built_in_led = kw.get("built_in_led")
     #check if btree info is populated
     with open("config.json") as f:
         config = json.load(f)
@@ -110,21 +120,33 @@ def build_app(**kw):
 #                #incorrect credentials, delete existing credentials and soft_reset
                 delete(repo=repo)
                 print("unable to connect to wifi... resetting")
-                blink_fail()
+                blink_fail_app(built_in_led)
                 machine.reset()
 
 
         # Print out the network configuration received from DHCP
         
         print('network config:', sta_if.ifconfig())
-        blink_success()
+        blink_success_app(built_in_led)
         repo.close()
         return App(api_key=api_key, conf=config, **kw)
     else:
         web_page()
 
 
-        
+def blink_success_app(led):
+    for _ in range(0,3):
+        led.on()
+        time.sleep(1)
+        led.off()
+        time.sleep(1)
+
+
+def blink_fail_app(led):
+    led.on()
+    time.sleep(5)
+    led.off()
+    time.sleep(2)
 
     
 def delete(repo):
@@ -134,15 +156,5 @@ def delete(repo):
     repo.close()
     gc.collect()
 
-def blink_success():
-    for i in range(0,3):
-        p_builtin.on()
-        p_builtin.off()
-        time.sleep(1)
-
-
-def blink_fail():
-    p_builtin.on()
-    time.sleep(5)
 
     
