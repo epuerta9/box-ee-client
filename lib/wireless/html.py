@@ -44,7 +44,7 @@ div {
   </head>
   <body>
     <p>
-        To generate a device api key go visit our documentation on how to generate one.
+        To generate a device api key go visit our documentation on how to generate one at https://docs.box-ee.com.
     </p>
     <form
       method="POST"
@@ -52,7 +52,7 @@ div {
         <label for="ssid">SSID:</label><br>
       <input type="text" name="ssid" id="ssid" />
         <label for="password">Password:</label><br>
-      <input type="text" name="password" id=password" />
+      <input type="password" name="password" id=password" />
         <label for="device-key">Device api Key:</label><br>
       <input type="text" name="device-key" id=device-key" />
       <input type="submit" value="Submit" />
@@ -107,7 +107,7 @@ div {
   <body>
     <p>
         Saving your key and restarting the device! 
-        if you want to update your api key at a later time, press the wifi reset button for it to boot into web mode.
+        if you want to update your api key at a later time, press the reset button for it to clear info and reboot.
     </p>    
 
   </body>

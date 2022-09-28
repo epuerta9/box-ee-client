@@ -15,6 +15,7 @@ import sys
 interruptCounter = 0
 
 LED_BUILTIN = 2
+RESET_BUTTON = 32
 
 def main():
     #Start box-ee device program
@@ -28,7 +29,10 @@ def main():
 
     built_in_led = Pin(LED_BUILTIN, Pin.OUT)
 
-    app = build_app(uart=uart, lock_pin=lock_pin, reset_button=reset_button, built_in_led=built_in_led)
+    #completely reset button
+    reset_button = Pin(32, Pin.IN, Pin.PULL_UP)
+
+    app = build_app(uart=uart, lock_pin=lock_pin, reset_button=reset_button, built_in_led=built_in_led, reset_button=reset_button)
     try:
         app.ping()
         blink_success_app(built_in_led)

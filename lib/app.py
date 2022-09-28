@@ -9,13 +9,13 @@ from lib.pinpad import PinPad
 import network
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from uasyncio import get_event_loop
+from uasyncio import get_event_loop, sleep_ms
 
 
 
 class App:
 
-    def __init__(self, api_key, conf, **kw):
+    def __init__(self, api_key, conf, repo, **kw):
 
         self.endpoint = conf["config"]["endpoint"]
         self.healthcheck = conf["config"]["healthcheck"]
@@ -26,6 +26,7 @@ class App:
         self._lock_pin = kw.get("lock_pin")
         self._reset_button = kw.get("reset_button")
         self._built_in_led = kw.get("built_in_led")
+        self._repo = repo
 
     def ping(self):
         try:
@@ -78,9 +79,23 @@ class App:
             scanner = Scanner(self._uart, async_validate_func=self.validate_pin, lock=lock, built_in_led=self._built_in_led)
             loop.create_task(scanner.run())
             print("created scanner coroutine task")
+        
+        if self._reset_button:
+           loop.create_task(reset_watcher(self._reset_button, self._repo)) 
 
 
         loop.run_forever()
+
+async def reset_watcher(button, repo):
+
+    while True:
+        if button.value():
+            delete(repo)
+            time.sleep(1)
+            machine.reset()
+
+        await sleep_ms(1)
+
         
 
 def build_app(**kw):
@@ -131,17 +146,15 @@ def build_app(**kw):
         print('network config:', sta_if.ifconfig())
         blink_success_app(built_in_led)
         repo.close()
-        return App(api_key=api_key, conf=config, **kw)
+        return App(api_key=api_key, conf=config, repo=repo, **kw)
     else:
         web_page()
 
 
 def blink_success_app(led):
-    for _ in range(0,3):
-        led.on()
-        time.sleep(1)
-        led.off()
-        time.sleep(1)
+    led.on()
+    time.sleep(3)
+    led.off()
 
 
 def blink_fail_app(led):
@@ -154,6 +167,7 @@ def blink_fail_app(led):
 def delete(repo):
     repo.delete(WIFI_SSID_KEY)
     repo.delete(WIFI_PASSWORD_KEY)
+    repo.delete(DEVICE_API_KEY)
     repo.flush()
     repo.close()
     gc.collect()
