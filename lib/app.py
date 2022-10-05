@@ -9,7 +9,7 @@ from lib.pinpad import PinPad
 import network
 from lib.repo import Repo, WIFI_PASSWORD_KEY, WIFI_SSID_KEY, DEVICE_API_KEY
 from lib.wireless.access_point import web_page 
-from uasyncio import get_event_loop, sleep_ms
+from uasyncio import get_event_loop, sleep_ms, sleep
 
 
 
@@ -82,9 +82,20 @@ class App:
         
         if self._reset_button:
            loop.create_task(reset_watcher(self._reset_button, self._repo)) 
+           print("created reset button task")
 
+        #setup wake up sensor
+        loop.create_task(light_sleep_timer())
+        print("created light sleep timer task")
 
+        #run loop
         loop.run_forever()
+
+async def light_sleep_timer():
+    while True:
+        await sleep(180)
+        print("going into light sleep")
+        machine.lightsleep()
 
 async def reset_watcher(button, repo):
 

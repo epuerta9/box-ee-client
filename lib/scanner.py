@@ -8,6 +8,7 @@
 #
 import time
 import uasyncio
+from machine import lightsleep
 
 MSG_START =               0xFE
 LINE_DELIM =              0x0A
@@ -127,6 +128,7 @@ class Scanner:
         led.on()
         time.sleep(3)
         led.off()
+        lightsleep()
 
     def blink_scanner_fail(self, led):
         for _ in range(3):
@@ -134,6 +136,7 @@ class Scanner:
             time.sleep(.5)
             led.off()
             time.sleep(.5)
+        lightsleep()
 
 KEY_CODES = {
     4 : 'A',

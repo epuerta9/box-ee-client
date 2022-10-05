@@ -12,6 +12,7 @@ from lib.app import build_app, blink_success_app, blink_fail_app
 from machine import UART, Pin
 import sys
 
+import esp32
 interruptCounter = 0
 
 LED_BUILTIN = 2
@@ -31,6 +32,9 @@ def main():
 
     #completely reset button
     reset_button = Pin(32, Pin.IN, Pin.PULL_UP)
+
+    sleep_pin = Pin(33, Pin.IN)
+    esp32.wake_on_ext0(pin=sleep_pin, level=esp32.WAKEUP_ANY_HIGH)
 
     app = build_app(uart=uart, lock_pin=lock_pin, reset_button=reset_button, built_in_led=built_in_led, reset_button=reset_button)
     try:

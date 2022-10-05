@@ -1,5 +1,5 @@
 
-from machine import Pin
+from machine import Pin, lightsleep
 import uasyncio
 import time
 
@@ -42,6 +42,7 @@ class PinPad:
         led.on()
         time.sleep(3)
         led.off()
+        lightsleep()
 
     def blink_scanner_fail(self, led):
         for _ in range(3):
@@ -49,6 +50,7 @@ class PinPad:
             time.sleep(.5)
             led.off()
             time.sleep(.5)
+        lightsleep()
 
     async def scan_coro(self):
         """A coroutine to scan each row and check column for key events."""
