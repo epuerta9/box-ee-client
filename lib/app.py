@@ -15,7 +15,7 @@ from uasyncio import get_event_loop, sleep_ms, sleep
 
 class App:
 
-    def __init__(self, api_key, conf, repo, **kw):
+    def __init__(self, api_key, conf, **kw):
 
         self.endpoint = conf["config"]["endpoint"]
         self.healthcheck = conf["config"]["healthcheck"]
@@ -26,7 +26,6 @@ class App:
         self._lock_pin = kw.get("lock_pin")
         self._reset_button = kw.get("reset_button")
         self._built_in_led = kw.get("built_in_led")
-        self._repo = repo
 
     def ping(self):
         try:
@@ -54,7 +53,10 @@ class App:
         except Exception as err:
             blink_fail_app(self._built_in_led)
             print(f"error: {err}")
-            return None
+            return {
+                "valid" : False,
+                "error" : err
+            }
 
     def run(self):
         """
@@ -81,13 +83,19 @@ class App:
             print("created scanner coroutine task")
         
         if self._reset_button:
-           loop.create_task(reset_watcher(self._reset_button, self._repo)) 
+           loop.create_task(reset_watcher(self._reset_button)) 
            print("created reset button task")
 
         #setup wake up sensor
         loop.create_task(light_sleep_timer())
         print("created light sleep timer task")
 
+        print("starting main event loop")
+        print("**************")
+        print("**to clear current device settings, reset configuration by pressing reset button**")
+        print("**learn more at https://docs.box-ee.com**")
+        print("**************")
+        print("let's rock")
         #run loop
         loop.run_forever()
 
@@ -97,10 +105,11 @@ async def light_sleep_timer():
         print("going into light sleep")
         machine.lightsleep()
 
-async def reset_watcher(button, repo):
+async def reset_watcher(button):
 
     while True:
         if button.value():
+            repo = Repo()
             delete(repo)
             time.sleep(1)
             machine.reset()

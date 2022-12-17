@@ -24,8 +24,8 @@ def web_page():
   import gc
   gc.collect()
 
-  ssid = 'MicroPython-AP'
-  password = '123456789'
+  ssid = 'BOX-EE-AP'
+  password = 'boxee_lan00'
 
   ap = network.WLAN(network.AP_IF)
   ap.active(True)

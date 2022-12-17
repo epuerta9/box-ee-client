@@ -90,6 +90,7 @@ class PinPad:
                             print(f"string: {pass_string}")
                             try:
                                 response = self._async_validate_func(pass_string)
+                                print(f"pinpad evaluating response: {response}")
                                 if response.get("valid"):
                                     self._lock.unlock()
                                     await uasyncio.sleep(5)
@@ -98,6 +99,9 @@ class PinPad:
                                     self.pass_code = []
                                 else:
                                    self.blink_scanner_fail(self._built_in_led) 
+                            except Exception as err:
+                                print("an error in pinpad occurred: " + err)
+
                             finally:
                                 #clean the pass code
                                 self.pass_code = []

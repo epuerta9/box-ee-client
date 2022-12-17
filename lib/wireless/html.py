@@ -51,10 +51,13 @@ div {
       enctype="application/json">
         <label for="ssid">SSID:</label><br>
       <input type="text" name="ssid" id="ssid" />
+        <div></div>
         <label for="password">Password:</label><br>
       <input type="password" name="password" id=password" />
+        <div></div>
         <label for="device-key">Device api Key:</label><br>
       <input type="text" name="device-key" id=device-key" />
+        <div></div>
       <input type="submit" value="Submit" />
     </form>
   </body>
