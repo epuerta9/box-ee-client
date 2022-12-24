@@ -67,6 +67,10 @@ def web_page():
           output[key] = value 
     
         print(output)
+
+        #to account for whitespace in ssid
+        if "+" in output["ssid"]:
+          output["ssid"] = output["ssid"].replace("+", " ")
         
 
         response = submitted_html
